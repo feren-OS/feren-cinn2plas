@@ -1,0 +1,191 @@
+#!/bin/bash
+
+transitiontext="Transitioning to the new Feren OS Experience... please wait."
+
+function beginTransition() {
+    clear
+    if [ "$(/bin/cat /etc/feren-os-base)" = "bionic" ]; then
+        echo "Checking for the HWE Stack and if it's not installed installing it"
+        /usr/bin/apt install -y --install-recommends linux-generic-hwe-18.04 xserver-xorg-hwe-18.04
+        clear
+    fi
+    if [ -f /usr/bin/enable-neon-ppa ]; then
+        echo "Enabling the Neon Mirror as it's required..."
+        basecodename=$(/bin/cat /etc/feren-os-base)
+        echo "deb [arch=amd64] https://gitlab.com/feren-os/feren-repositories-neon/raw/master stable neon-$basecodename" > /etc/apt/sources.list.d/feren-os-neon.list
+        /bin/rm /usr/bin/enable-neon-ppa
+        /usr/bin/apt update
+        clear
+    fi
+    echo "Installing the new Feren OS experience... This WILL take a while..."
+    /usr/bin/apt install -y xserver-xorg-input-wacom-hwe-18.04
+    if [ ! $? -eq 0 ]; then
+        /usr/bin/apt-get -f install -y
+        /usr/bin/apt install -y xserver-xorg-input-wacom-hwe-18.04
+        if [ ! $? -eq 0 ]; then
+            zenity --error --title="Transition Failed" --text="There was an error during package management while installing and removing
+packages ready for the transition process.
+Try again later and if the problem still persists get in touch with The Feren OS Dev." --no-wrap
+            exit 1
+        fi
+    fi
+    /usr/bin/apt purge -y feren-oobe
+    if [ ! $? -eq 0 ]; then
+        /usr/bin/apt-get -f install -y
+        /usr/bin/apt purge -y feren-oobe
+        if [ ! $? -eq 0 ]; then
+            zenity --error --title="Transition Failed" --text="There was an error during package management while installing and removing
+packages ready for the transition process.
+Try again later and if the problem still persists get in touch with The Feren OS Dev." --no-wrap
+            exit 1
+        fi
+    fi
+    /usr/bin/apt install -y feren-meta-plasma-core kdenetwork-filesharing frameworkintegration kde-cli-tools kde-config-gtk-style kde-config-screenlocker khotkeys kio kio-extras kscreen plasma-nm plasma-pa user-manager systemsettings plasma-workspace plasma-framework powerdevil polkit-kde-agent-1 policykit-desktop-privileges plasma-desktop bluedevil kwin kwin-addons print-manager kde-baseapps-bin appmenu-qt kdelibs-bin kdelibs5-data kdelibs5-plugins kde-cli-tools-data kde-config-screenlocker kgamma5 kio-audiocd kwin-data plasma-desktop-data powerdevil-data libkf5kdelibs4support5-bin kinfocenter phonon-backend-gstreamer feren-info-kde adwaita-icon-theme-full fonts-hack numlockx onboard gnome-themes-standard
+    if [ ! $? -eq 0 ]; then
+        /usr/bin/apt-get -f install -y
+        /usr/bin/apt install -y feren-meta-plasma-core kdenetwork-filesharing frameworkintegration kde-cli-tools kde-config-gtk-style kde-config-screenlocker khotkeys kio kio-extras kscreen plasma-nm plasma-pa user-manager systemsettings plasma-workspace plasma-framework powerdevil polkit-kde-agent-1 policykit-desktop-privileges plasma-desktop bluedevil kwin kwin-addons print-manager kde-baseapps-bin appmenu-qt kdelibs-bin kdelibs5-data kdelibs5-plugins kde-cli-tools-data kde-config-screenlocker kgamma5 kio-audiocd kwin-data plasma-desktop-data powerdevil-data libkf5kdelibs4support5-bin kinfocenter phonon-backend-gstreamer feren-info-kde adwaita-icon-theme-full fonts-hack numlockx onboard gnome-themes-standard
+        if [ ! $? -eq 0 ]; then
+            zenity --error --title="Transition Failed" --text="There was an error during package management while installing and removing
+packages ready for the transition process.
+Try again later and if the problem still persists get in touch with The Feren OS Dev." --no-wrap
+            exit 1
+        fi
+    fi
+    /usr/bin/apt remove -y mintsystem ubuntu-system-adjustments
+    if [ ! $? -eq 0 ]; then
+        /usr/bin/apt-get -f install -y
+        /usr/bin/apt remove -y mintsystem ubuntu-system-adjustments
+        if [ ! $? -eq 0 ]; then
+            zenity --error --title="Transition Failed" --text="There was an error during package management while installing and removing
+packages ready for the transition process.
+Try again later and if the problem still persists get in touch with The Feren OS Dev." --no-wrap
+            exit 1
+        fi
+    fi
+    /usr/bin/apt install -y feren-meta-os-plasma-system feren-artwork lightdm slick-greeter feren-slick-config-plasma feren-icon-patches feren-plasma-startup-adjuster feren-plasma-vm-adjuster ureadahead lightdm-settings-feren-plasma ferenlocale-plasma feren-plasma-desktop feren-plasma-desktop-full feren-plasma-config-configs feren-plasma-config-patches feren-plasma-config-applications feren-patched-kcms feren-plasma-iconsapply feren-themer-plasma feren-theme-colouriser-plasma-feren nemo-plasma-integration feren-kde-applets plasma-layouts-feren-default feren-kde-colourschemes feren-kde-nemorouting feren-kde-settings feren-kde-theme-patches feren-oobe-kde feren-xsettings kvantum-themes-feren plasma-theme-feren feren-backgrounds fonts-open-sans fonts-dejavu latte-dock feren-latte-config feren-info-kde plasma-layouts-feren-cupertino plasma-layouts-feren-familiar-redmond plasma-layouts-feren-unity plasma-wallpapers-addons kdeconnect feren-appmenu-integration plasma-widgets-addons feren-plasma-vm-adjuster nemo-ark feren-app-packages-plasma vlc krita okular remmina remmina-plugin-rdp remmina-plugin-xdmcp remmina-plugin-vnc feren-welcome feren-themer-plasma feren-theme-colouriser feren-theme-colouriser-plasma-feren latte-dock kate simple-scan ark onboard kde-spectacle ksysguard konsole feren-store feren-maintenance feren-os-majorupdate gnome-keyring feren-os-plasma feren-cinn2plas-backupandrestore breeze-gtk-theme gtk3-engines-breeze kde-config-tablet plasma-browser-integration
+    if [ ! $? -eq 0 ]; then
+        /usr/bin/apt-get -f install -y
+        /usr/bin/apt install -y feren-meta-os-plasma-system feren-artwork lightdm slick-greeter feren-slick-config-plasma feren-icon-patches feren-plasma-startup-adjuster feren-plasma-vm-adjuster ureadahead lightdm-settings-feren-plasma ferenlocale-plasma feren-plasma-desktop feren-plasma-desktop-full feren-plasma-config-configs feren-plasma-config-patches feren-plasma-config-applications feren-patched-kcms feren-plasma-iconsapply feren-themer-plasma feren-theme-colouriser-plasma-feren nemo-plasma-integration feren-kde-applets plasma-layouts-feren-default feren-kde-colourschemes feren-kde-nemorouting feren-kde-settings feren-kde-theme-patches feren-oobe-kde feren-xsettings kvantum-themes-feren plasma-theme-feren feren-backgrounds fonts-open-sans fonts-dejavu latte-dock feren-latte-config feren-info-kde plasma-layouts-feren-cupertino plasma-layouts-feren-familiar-redmond plasma-layouts-feren-unity plasma-wallpapers-addons kdeconnect feren-appmenu-integration plasma-widgets-addons feren-plasma-vm-adjuster nemo-ark feren-app-packages-plasma vlc krita okular remmina remmina-plugin-rdp remmina-plugin-xdmcp remmina-plugin-vnc feren-welcome feren-themer-plasma feren-theme-colouriser feren-theme-colouriser-plasma-feren latte-dock kate simple-scan ark onboard kde-spectacle ksysguard konsole feren-store feren-maintenance feren-os-majorupdate gnome-keyring feren-os-plasma feren-cinn2plas-backupandrestore breeze-gtk-theme gtk3-engines-breeze kde-config-tablet plasma-browser-integration
+        if [ ! $? -eq 0 ]; then
+            zenity --error --title="Transition Failed" --text="There was an error during package management while installing and removing
+packages ready for the transition process.
+Try again later and if the problem still persists get in touch with The Feren OS Dev." --no-wrap
+            exit 1
+        fi
+    fi
+    
+    clear
+    echo "Scheduling the removal of the old experience for the next startup..."
+    systemctl enable feren-cinn2plas-phase2.service
+    
+    clear
+    echo "Preparing to Restart..."
+    systemctl -i reboot
+}
+
+function phase2() {
+    dpkg --configure -a
+    apt autoremove -y
+    cp -fv /etc/skel/Desktop/feren-themer.desktop /usr/share/feren-cinn2plas/feren-themer.desktop
+    rm -fv /usr/share/cinnamon/faces/Ambient.jpg /usr/share/cinnamon/faces/Aurora.jpg /usr/share/cinnamon/faces/Azure.jpg /usr/share/cinnamon/faces/Colourful.jpg /usr/share/cinnamon/faces/Contrast.jpg /usr/share/cinnamon/faces/Follow.jpg /usr/share/cinnamon/faces/Hope.jpg /usr/share/cinnamon/faces/Light.png /usr/share/cinnamon/faces/London.png /usr/share/cinnamon/faces/Lone.png /usr/share/cinnamon/faces/Mountain.png '/usr/share/cinnamon/faces/Night Lights.jpg' '/usr/share/cinnamon/faces/Night Tree.jpg' /usr/share/cinnamon/faces/Purple.png /usr/share/cinnamon/faces/Rise.jpg /usr/share/cinnamon/faces/Sign.png /usr/share/cinnamon/faces/Sunset.png /usr/share/cinnamon/faces/Them.png
+    rm -rfv "/usr/share/themes/feren Cyan" "/usr/share/themes/feren Red" "/usr/share/themes/feren Orange" "/usr/share/themes/feren Pink" "/usr/share/themes/feren Green" "/usr/share/themes/feren Grey"
+    if [ -f /usr/share/cinnamon/faces/user-generic.png ]; then
+        if [ "$(readlink -m /usr/share/cinnamon/faces/user-generic.png)" = "/usr/share/user-manager/avatars/feren/Default.png" ]; then
+            rm -fv /usr/share/cinnamon/faces/user-generic.png
+        fi
+    fi
+    rm -fv /usr/share/pixmaps/faces/Ambient.jpg /usr/share/pixmaps/faces/Aurora.jpg /usr/share/pixmaps/faces/Azure.jpg /usr/share/pixmaps/faces/Colourful.jpg /usr/share/pixmaps/faces/Contrast.jpg /usr/share/pixmaps/faces/Follow.jpg /usr/share/pixmaps/faces/Hope.jpg /usr/share/pixmaps/faces/Light.png /usr/share/pixmaps/faces/London.png /usr/share/pixmaps/faces/Lone.png /usr/share/pixmaps/faces/Mountain.png '/usr/share/pixmaps/faces/Night Lights.jpg' '/usr/share/pixmaps/faces/Night Tree.jpg' /usr/share/pixmaps/faces/Purple.png /usr/share/pixmaps/faces/Rise.jpg /usr/share/pixmaps/faces/Sign.png /usr/share/pixmaps/faces/Sunset.png /usr/share/pixmaps/faces/Them.png
+    if [ -f /usr/share/pixmaps/faces/user-generic.png ]; then
+        if [ "$(readlink -m /usr/share/pixmaps/faces/user-generic.png)" = "/usr/share/user-manager/avatars/feren/Default.png" ]; then
+            rm -fv /usr/share/pixmaps/faces/user-generic.png
+        fi
+    fi
+    rm -fv /usr/share/feren-themer/default-module-installed /usr/share/feren-themer/cinnamon/installed-packages
+    rm -rfv /usr/share/feren-themer/themes
+    /usr/bin/apt purge -y feren-app-packages-cinnamon evince gnome-session-bin mint-artwork xed xpad feren-themer-cinnamon feren-theme-colouriser-cinnamon-* feren-config-cinnamon cinnamon-control-center-feren feren-info-cinnamon feren-info-stock feren-meta-stock cinnamon feren-*-layout-cinnamon cinnamon-common cinnamon-control-center cinnamon-control-center-feren cinnamon-control-center-data cinnamon-doc cinnamon-screensaver cinnamon-session cinnamon-session-common cinnamon-settings-daemon cinnamon-settings-daemon-dev nemo-fileroller conky feren-conky-toggle conky-all conky-std gnome-system-monitor system-config-printer mintreport docky redshift mintmenu mint-info-cinnamon blueberry nvidia-prime-applet feren-themer feren-cinnamon-additions feren-meta-cinnamon feren-meta-stock feren-os feren-os-cinnamon gnome-font-viewer baobab caribou cjs evince-common feren-qtgtk-integration file-roller gdebi gdebi-core gnome-bluetooth gnome-icon-theme gnome-icon-theme-symbolic gnome-online-accounts gnome-orca gnome-power-manager gnome-screenshot gnome-settings-daemon gnome-session-canberra gnome-terminal gnome-terminal-data mate-desktop mate-desktop-common mate-menus mate-panel mate-panel-common mate-polkit mate-polkit-common metacity metacity-common muffin muffin-common muffin-dbg rhythmbox-data xed-common xplayer-common
+    /var/lib/dpkg/info/feren-theme.postinst
+    update-alternatives --set x-cursor-theme /usr/share/icons/DMZ-White/cursor.theme
+    folderstocopy=".config/autostart
+.config/gtk-3.0 .config/Kvantum
+.config/latte
+.local/share/kate
+.local/share/konsole
+.local/share/kxmlgui5"
+    filestocopy=".config/kdeglobals
+.config/kglobalshortcutsrc
+.local/share/user-places.xbel
+.gtkrc-2.0"
+    cd /home
+    for username in *; do
+        if [ -d "/home/$username" ] && id -u "$username"; then
+        for foldertocopy in $folderstocopy; do
+            while read -r folder; do
+                folder2=$(echo "$folder" | sed "s%/etc/skel/%%g")
+                if [ ! -d "/home/$username/$folder2" ]; then
+                    mkdir "/home/$username/$folder2"
+                    chown -hv $username:$username "/home/$username/$folder2"
+                fi
+                while read -r file1; do
+                    file2=$(echo "$file1" | sed "s%/etc/skel/%/home/$username/%g")
+                    cp -fv "$file1" "$file2"
+                    chown -hv $username:$username "$file2"
+                done <<< $(find "/etc/skel/$foldertocopy" -type f)
+            done <<< $(find "/etc/skel/$foldertocopy" -type d)
+        done
+        for filetocopy in $filestocopy; do
+            cp -fv "/etc/skel/$filetocopy" "/home/$username/$filetocopy"
+            chown -hv $username:$username "/home/$username/$filetocopy"
+        done
+        rm -fv /home/$username/.config/autostart/feren-cinn2plas.desktop
+        touch /home/$username/.feren/ex-cinnamon
+        touch /home/$username/.feren/ex-cinnamon-firstlogin
+        chown -hv $username:$username /home/$username/.feren/ex-cinnamon /home/$username/.feren/ex-cinnamon-firstlogin
+        cp -fv /usr/share/feren-cinn2plas/feren-plasma-cinnrestore.desktop /home/$username/.config/autostart/feren-plasma-cinnrestore.desktop
+        chown -hv $username:$username /home/$username/.config/autostart/feren-plasma-cinnrestore.desktop
+        rm -fv /home/$username/.feren/disable-cinn2plas-autostart
+        rm -fv /home/$username/.config/autostart/Conky.desktop /home/$username/.config/autostart/applauncher-cinnamon.desktop /home/$username/.config/autostart/docky-cinnamon.desktop
+        fi
+    done
+    cd
+    rm -fv /usr/bin/feren-cinnamon-backup
+    /usr/bin/apt purge -y feren-cinn2plas
+    clear
+    echo "We're finishing up stuff here. You won't see anymore output here so just wait until you're taken to the login screen. The finishing up process may take a while..."
+}
+
+if [ "$1" == "transition-main" ]; then
+    beginTransition
+    exit $?
+elif [ "$1" == "transition" ]; then
+    zenity --question --title="Ready?" --text="This is your last chance to delay the transition. Once the transition is started, it should not be stopped.
+Once the transition is complete, it cannot be easily undone. Browsers such as Vivaldi and Google Chrome will also forget
+unsynced saved passwords, and you will need to sign back into their respective sync features, after the transition.
+
+Please save your work before starting this transition as Feren OS will restart automatically to complete the transition process.
+NOTE: A Terminal window will appear to show progress so far. You can close it fine without interrupting the transition process,
+however you'll want to check /tmp/feren-cinn2plas-phase1-log if you want to know the progress once more.
+
+If you are ready, click 'Yes' to start the transition. To delay the transition until later, click 'No'." --no-wrap
+    if [ ! $? -eq 0 ]; then
+        #Cancel the transition
+        zenity --info --title="Feren OS" --text="Alright, the transition has been delayed until the next time this utility is launched." --no-wrap
+        exit 1
+    fi
+    /usr/bin/notify-send -i distributor-logo "Now Transitioning" "The transition process has started. You can use the Terminal window to get details on progress."
+    /usr/bin/gnome-terminal --wait --title="Feren OS Transition Progress Details" -- sh -c "set +m; stty intr ''; pkexec /usr/bin/feren-cinn2plas transition-terminal || zenity --info --title='Feren OS' --text='The transition has been delayed until the next time this utility is launched.' --no-wrap"
+elif [ "$1" == "transition-terminal" ]; then
+    nohup "$0" transition-main 2>&1 > /tmp/feren-cinn2plas-phase1-log &
+    while [ ! -f /tmp/feren-cinn2plas-phase1-log ]; do
+        sleep 1
+    done
+    tail -f /tmp/feren-cinn2plas-phase1-log
+elif [ "$1" == "phase2" ]; then
+    plymouth message --text="Feren OS is finishing the transition process, please wait. Hit CTRL+ALT+F2 for more details."
+    phase2
+    plymouth message --text=""
+    exit 0
+elif [ "$1" == "goaway" ]; then
+    rm -f ~/.config/autostart/feren-cinn2plas.desktop
+    touch ~/.feren/disable-cinn2plas-autostart
+    exit 0
+fi

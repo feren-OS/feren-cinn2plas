@@ -1,0 +1,11 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Encoding=UTF-8
+Exec=feren-plasma-cinnrestore
+Name=Restore settings to Plasma
+Comment=Begin the restoration process of backed up settings to Plasma
+Terminal=false
+OnlyShowIn=KDE;
+Type=Application
+StartupNotify=false
+X-KDE-autostart-after=panel

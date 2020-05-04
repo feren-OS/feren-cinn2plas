@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ ! -f /etc/feren-os-overrides/no-cinn2plas-autostart ]; then
+origdir=$(pwd)
+cd /home
+for usernm in *; do
+    if [ -d "$usernm" ]; then
+        if id -u "$usernm" && [ ! -f /home/$usernm/.feren/disable-cinn2plas-autostart ]; then
+            cp -R /etc/skel/.config/autostart/feren-cinn2plas.desktop /home/$usernm/.config/autostart/feren-cinn2plas.desktop
+            chown -h $usernm:$usernm /home/$usernm/.config/autostart/feren-cinn2plas.desktop
+            chmod +x /home/$usernm/.config/autostart/feren-cinn2plas.desktop
+        fi
+    fi
+done
+cd "$origdir"
+else
+    rm -f /etc/skel/.config/autostart/feren-cinn2plas.desktop
+fi

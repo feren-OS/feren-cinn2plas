@@ -1,0 +1,14 @@
+[Unit]
+Description=Phase 2 of the transition to Feren OS with Plasma
+Before=lightdm.service systemd-user-sessions.service plymouth-quit-wait.service getty.target unattended-upgrades.service feren-plasma-vm-adjuster.service feren-autopackagemgmt.service gerry@tty2.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/feren-cinn2plas phase2
+TimeoutSec=infinity
+TimeoutStopSec=infinity
+StandardOutput=tty
+TTYPath=/dev/tty2
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,37 @@
+#!/bin/bash
+export TEXTDOMAIN=$(basename $0)
+source gettext.sh
+warnings=""
+
+if [ ! "$(whoami)" = "root" ]; then
+    echo "This isn't Superuser."
+    exit 1
+fi
+
+cd /home
+for username in *; do
+    if [ -d "/home/$username" ] && id -u "$username"; then
+        if [ ! -d /home/$username/.feren ]; then
+            mkdir /home/$username/.feren
+        fi
+        icontheme=$(sudo -H -u $username bash -c 'gsettings get org.cinnamon.desktop.interface icon-theme')
+        icontheme=$(echo $icontheme | sed "s/^'\(.*\)'$/\1/")
+        echo "IconTheme=$icontheme" > /home/$username/.feren/cinnamon-config-data
+        cursortheme=$(sudo -H -u $username bash -c 'gsettings get org.cinnamon.desktop.interface cursor-theme')
+        cursortheme=$(echo $cursortheme | sed "s/^'\(.*\)'$/\1/")
+        echo "CursorTheme=$cursortheme" >> /home/$username/.feren/cinnamon-config-data
+        gtktheme=$(sudo -H -u $username bash -c 'gsettings get org.cinnamon.desktop.interface gtk-theme')
+        gtktheme=$(echo $gtktheme | sed "s/^'\(.*\)'$/\1/")
+        echo "GTKTheme=$gtktheme" >> /home/$username/.feren/cinnamon-config-data
+        themertheme=$(sudo -H -u $username bash -c 'gsettings get org.feren.feren-themer.cinnamon theme-name')
+        themertheme=$(echo $themertheme | sed "s/^'\(.*\)'$/\1/")
+        echo "ThemerTheme=$themertheme" >> /home/$username/.feren/cinnamon-config-data
+        wallpaper=$(sudo -H -u $username bash -c 'gsettings get org.cinnamon.desktop.background picture-uri')
+        wallpaper=$(echo $wallpaper | sed "s/^'\(.*\)'$/\1/")
+        echo "Wallpaper=$wallpaper" >> /home/$username/.feren/cinnamon-config-data
+        chown -h $username:$username /home/$username/.feren/cinnamon-config-data
+    fi
+done
+cd
+zenity --info --title=" " --text="Cinnamon Configurations have been successfully backed up for all users.
+When you're ready, proceed to begin the transition and Feren OS will handle the rest." --no-wrap &

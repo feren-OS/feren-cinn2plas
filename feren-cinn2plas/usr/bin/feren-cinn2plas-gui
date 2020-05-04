@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if id -nG "$(whoami)" | grep -qw "sudo"; then
+    :
+else
+    echo "This user is not an administrator. Exiting."
+    exit 1
+fi
+var=$(awk -F: '($3>=1000){print $1}' /etc/passwd | wc -l)
+if [[ $var -gt 1 ]]; then
+    :
+else
+    echo "Feren OS Classic has not been installed yet. Exiting."
+    exit 1
+fi
+while [ ! -f "$HOME/.feren/oobe-complete" ]; do
+    sleep 10
+done
+cd /usr/share/feren-cinn2plas
+python3 /usr/share/feren-cinn2plas/feren-cinn2plas.py
+exit $?

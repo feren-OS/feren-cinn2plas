@@ -1,0 +1,340 @@
+#!/bin/bash
+export TEXTDOMAIN=$(basename $0)
+source gettext.sh
+warnings=""
+
+if [ "$1" = "--bg" ]; then
+	configdata="$(cat ~/.feren/cinnamon-config-data)"
+	#Wallpaper
+	wallpaper=$(echo "$configdata" | grep "Wallpaper=")
+    	wallpaper=$(echo $wallpaper | sed "s/Wallpaper=//g")
+	dbus-send --session --dest=org.kde.plasmashell --type=method_call /PlasmaShell org.kde.PlasmaShell.evaluateScript 'string:
+var Desktops = desktops();                                                                                                                       
+for (i=0;i<Desktops.length;i++) {
+        d = Desktops[i];
+        d.wallpaperPlugin = "org.kde.image";
+        d.currentConfigGroup = Array("Wallpaper",
+                                    "org.kde.image",
+                                    "General");
+        d.writeConfig("Image", "'"$wallpaper"'");
+}'
+	exit 0
+fi
+if [ "$1" = "--rest-process" ]; then
+	cd ~
+	#Main Restoration of Cinnamon Settings
+	killall -9 plasmashell
+	rm -f ~/.config/plasma-org.kde.plasma.desktop-appletsrc ~/.config/plasmashellrc
+	echo 10
+	echo "#"$(eval_gettext "Retrieving configuration data from Cinnamon Backup...")""
+	if [ -f ~/.feren/cinnamon-config-data ]; then
+		configdata="$(cat ~/.feren/cinnamon-config-data)"
+		echo "LaF ThemeMode" > ~/.feren/oobe-complete-plasma
+		killall feren-oobe-plasma feren-oobe.py
+		rm -f /tmp/feren-oobe-running-$(whoami)
+		#Themer Theme
+		appliedlayout=$(echo "$configdata" | grep "ThemerTheme=")
+        appliedlayout=$(echo $appliedlayout | sed "s/ThemerTheme=//g")
+		echo 20
+		
+		echo "#"$(eval_gettext "Applying Theme and Layout Based On Applied Themer Theme Data...")""
+		
+		if [ "$appliedlayout" = "Chrome OS Layout" ] || [ "$appliedlayout" = "Chrome OS" ]; then
+			/usr/bin/oobe-apply-layout-plasma TabletMode >/dev/null 2>&1
+            /usr/bin/feren-latte-launch quit >/dev/null 2>&1
+            rm -f /tmp/latte-dock.$(whoami).lock
+			
+		elif [ "$appliedlayout" = "feren Dark" ] || [ "$appliedlayout" = "feren Default" ]; then
+			lookandfeeltool -a org.feren.default --resetLayout >/dev/null 2>&1
+			if [ "$appliedlayout" = "feren Dark" ]; then
+                lookandfeeltool -a org.feren.dark --resetLayout >/dev/null 2>&1
+            fi
+		elif [ "$appliedlayout" = "feren Tablet Mode" ] || [ "$appliedlayout" = "feren Tablet Mode Dark" ]; then
+			/usr/bin/oobe-apply-layout-plasma TabletMode >/dev/null 2>&1
+            /usr/bin/feren-latte-launch quit >/dev/null 2>&1
+            rm -f /tmp/latte-dock.$(whoami).lock
+			if [ "$appliedlayout" = "feren Tablet Mode Dark" ]; then
+                /usr/bin/oobe-apply-layout-plasma Dark >/dev/null 2>&1
+                kwriteconfig5 --file ~/.config/kdeglobals --group KDE --key LookAndFeelPackage "org.feren.hybrid"
+            fi
+			
+		elif [ "$appliedlayout" = "Linux Mint Layout" ] || [ "$appliedlayout" = "Linux Mint" ]; then
+			#Change Theme to Feren & Tell User (Not supported)
+			newwarning="$(eval_gettext 'Your Theme/Layout in Cinnamon (THEMENM) is no longer available in the new experience, but they always used Breeze in their Plasma Flavour before it got discontinued, so that has been applied instead.')"
+			newwarning=$(echo "$newwarning" | sed "s/THEMENM/$appliedlayout/g")
+			if [ ! -z "$warnings" ]; then
+				warnings="$warnings
+- $newwarning"
+			else
+				warnings="- $newwarning"
+			fi
+			lookandfeeltool -a org.kde.breeze.desktop --resetLayout >/dev/null 2>&1
+			forcegtktheme="on"
+            /usr/bin/feren-latte-launch quit >/dev/null 2>&1
+            rm -f /tmp/latte-dock.$(whoami).lock
+			
+		elif [ "$appliedlayout" = "macOS Layout" ] || [ "$appliedlayout" = "Mac OS X Layout" ] || [ "$appliedlayout" = "macOS" ] || [ "$appliedlayout" = "macOS Dark" ] || [ "$appliedlayout" = "Mac OS X" ]; then
+			/usr/bin/oobe-apply-layout-plasma Cupertino >/dev/null 2>&1
+            /usr/bin/feren-latte-launch quit >/dev/null 2>&1
+            rm -f /tmp/latte-dock.$(whoami).lock
+			
+		elif [ "$appliedlayout" = "Ubuntu Layout" ] || [ "$appliedlayout" = "Yosembiance" ] || [ "$appliedlayout" = "Ubuntu" ]; then
+			/usr/bin/oobe-apply-layout-plasma Unity >/dev/null 2>&1
+            /usr/bin/feren-latte-launch quit >/dev/null 2>&1
+            rm -f /tmp/latte-dock.$(whoami).lock
+			
+		elif [ "$appliedlayout" = "Windows 3.1 Layout" ]; then
+			#Change Theme to Feren & Tell User (Not supported)
+			newwarning="$(eval_gettext 'Your Theme/Layout in Cinnamon (THEMENM) is no longer available in the new experience, so we had to change your theme to the Redmond Layout.')"
+			newwarning=$(echo "$newwarning" | sed "s/THEMENM/$appliedlayout/g")
+			if [ ! -z "$warnings" ]; then
+				warnings="$warnings
+- $newwarning"
+			else
+				warnings="- $newwarning"
+			fi
+			/usr/bin/oobe-apply-layout-plasma Redmond >/dev/null 2>&1
+            /usr/bin/feren-latte-launch quit >/dev/null 2>&1
+            rm -f /tmp/latte-dock.$(whoami).lock
+			
+		elif [ "$appliedlayout" = "Windows 8 and 7 Layout" ] || [ "$appliedlayout" = "Windows 10 Layout" ] || [ "$appliedlayout" = "Windows 10" ] || [ "$appliedlayout" = "Windows 10 Dark" ] || [ "$appliedlayout" = "Windows 8" ] || [ "$appliedlayout" = "Windows 7" ]; then
+			/usr/bin/oobe-apply-layout-plasma Familiar >/dev/null 2>&1
+            /usr/bin/feren-latte-launch quit >/dev/null 2>&1
+            rm -f /tmp/latte-dock.$(whoami).lock
+			
+		elif [ "$appliedlayout" = "Windows Vista Layout" ] || [ "$appliedlayout" = "Windows XP and 2K Layout" ] || [ "$appliedlayout" = "Windows Vista" ] || [ "$appliedlayout" = "Windows XP" ] || [ "$appliedlayout" = "Windows 2000" ] || [ "$appliedlayout" = "Windows 9X" ]; then
+			/usr/bin/oobe-apply-layout-plasma Redmond >/dev/null 2>&1
+            /usr/bin/feren-latte-launch quit >/dev/null 2>&1
+            rm -f /tmp/latte-dock.$(whoami).lock
+			
+		else
+			#Change Theme to Feren & Tell User (Not supported)
+			newwarning="$(eval_gettext 'Your Theme/Layout in Cinnamon (THEMENM) is no longer available in the new experience, so we had to change your theme to the Default Layout.')"
+			newwarning=$(echo "$newwarning" | sed "s/THEMENM/$appliedlayout/g")
+			if [ ! -z "$warnings" ]; then
+				warnings="$warnings
+- $newwarning"
+			else
+				warnings="- $newwarning"
+			fi
+		fi
+		
+		killall feren-oobe-plasma feren-oobe.py
+		rm -f /tmp/feren-oobe-running-$(whoami)
+		#Cursor Theme
+		cursortheme=$(echo "$configdata" | grep "CursorTheme=")
+        cursortheme=$(echo $cursortheme | sed "s/CursorTheme=//g")
+		echo 40
+		echo "#"$(eval_gettext "Applying Cursor Theme...")""
+		if [ "$cursortheme" = "DMZ (White)" ]; then
+			cursortheme="DMZ-White"
+		fi
+		if [ "$cursortheme" = "DMZ (Black)" ]; then
+			cursortheme="DMZ-Black"
+		fi
+		newfield=$(echo 'cursorTheme='$cursortheme'')
+		kwriteconfig5 --file ~/.config/kcminputrc --group Mouse --key cursorTheme "$cursortheme"
+		plasma-gtkcursor-apply "$cursortheme"
+		
+		killall feren-oobe-plasma feren-oobe.py
+		rm -f /tmp/feren-oobe-running-$(whoami)
+		#GTK Theme
+		if [ ! "$forcegtktheme" = "on" ]; then
+		gtktheme=$(echo "$configdata" | grep "GTKTheme=")
+        gtktheme=$(echo $gtktheme | sed "s/GTKTheme=//g")
+		echo 60
+		echo "#"$(eval_gettext "Applying GTK Theme...")""
+		plasma-gtk-apply "$gtktheme"
+		qtappstyle="gtk2"
+		if [ -d "$HOME/.themes/$gtktheme" ]; then
+            if [ $(cat "$HOME/.themes/$gtktheme/theme-colouriser-type") = "feren" ]; then
+                if [ -f '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/colour.sh' ] && [ -f "$HOME/.themes/$gtktheme/theme-colouriser-colour" ] && [ -f "$HOME/.themes/$gtktheme/colouriser-theme-settings" ]; then
+                    newthemename=$(echo "$gtktheme" | tr -cd '[:alnum:]._-' | sed 's/-//g')
+                    newthemename="${newthemename^}"
+                    if [ "$(cat  "$HOME/.themes/$gtktheme/colouriser-theme-settings")" = "colrtbars" ]; then
+                        tbarmode="colour-titlebars"
+                    else
+                        tbarmode="none"
+                    fi
+                    if [ -d "$HOME/.themes/$newthemename" ] && [ -f "$HOME/.config/Kvantum/$newthemename/$newthemename.kvconfig" ] && [ -f "$HOME/.local/share/color-schemes/$newthemename.colors" ]; then
+                        themename="FerenCinnamonColourScheme"
+                    else
+                        themename="$newthemename"
+                    fi
+                    '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/colour.sh' --colour=$(cat "$HOME/.themes/$gtktheme/theme-colouriser-colour") --name="$themename" --location="$HOME/.themes" --titlebarmode="$tbarmode" --thememode="Light" --quit-on-invalid
+                    sleep 7
+                    '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/apply.sh' "$themename"
+                fi
+                qtappstyle="kvantum"
+            fi
+        fi
+        if [ "$gtktheme" = "feren" ]; then
+            qtappstyle="kvantum"
+            
+        elif [ "$gtktheme" = "feren Cyan" ] || [ "$gtktheme" = "FerenCyan" ]; then
+            gtktheme="FerenCyan"
+            '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/apply.sh' "$gtktheme"
+            qtappstyle="kvantum"
+        elif [ "$gtktheme" = "feren Red" ] || [ "$gtktheme" = "FerenRed" ]; then
+            gtktheme="FerenRed"
+            '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/apply.sh' "$gtktheme"
+            qtappstyle="kvantum"
+        elif [ "$gtktheme" = "feren Orange" ] || [ "$gtktheme" = "FerenOrange" ]; then
+            gtktheme="FerenOrange"
+            '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/apply.sh' "$gtktheme"
+            qtappstyle="kvantum"
+        elif [ "$gtktheme" = "feren Pink" ] || [ "$gtktheme" = "FerenPink" ]; then
+            gtktheme="FerenPink"
+            '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/apply.sh' "$gtktheme"
+            qtappstyle="kvantum"
+        elif [ "$gtktheme" = "feren Green" ] || [ "$gtktheme" = "FerenGreen" ]; then
+            gtktheme="FerenGreen"
+            '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/apply.sh' "$gtktheme"
+            qtappstyle="kvantum"
+        elif [ "$gtktheme" = "feren Grey" ] || [ "$gtktheme" = "FerenGrey" ]; then
+            gtktheme="FerenGrey"
+            '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/apply.sh' "$gtktheme"
+            qtappstyle="kvantum"
+            
+        elif [ "$gtktheme" = "feren-dark" ]; then
+            qtappstyle="kvantum-dark"
+            
+        elif [ "$gtktheme" = "Chicago95" ] || [ "$gtktheme" = "Windows 3.x" ] || [ "$gtktheme" = "Windows 9x" ] || [ "$gtktheme" = "Windows 9X" ] || [ "$gtktheme" = "WinMe" ]; then
+            #Use Windows Classic Qt Style
+            qtappstyle="windows"
+            
+        elif [ "$gtktheme" = "Breeze" ] || [ "$gtktheme" = "Breeze-Dark" ]; then
+            qtappstyle="Breeze"
+            
+        #Blacklisted themes since they get removed during this process
+        elif [ "$gtktheme" = "PoppyOSX" ] || [ "$gtktheme" = "Mavericks" ]; then
+            qtappstyle="Breeze"
+            /usr/bin/plasma-gtk-apply Breeze
+        elif [[ "$gtktheme" == *"-dark" ]] || [[ "$gtktheme" == *"-Dark" ]] || [[ "$gtktheme" == *" Dark" ]] || [[ "$gtktheme" == *" dark" ]]; then
+            "/usr/bin/themecolourisertool" -a org.feren.dark
+            plasma-gtk-apply "$gtktheme"
+        fi
+        /usr/bin/qtstyletool -a "$qtappstyle"
+        fi
+		
+		killall feren-oobe-plasma feren-oobe.py
+		rm -f /tmp/feren-oobe-running-$(whoami)
+		#Icon Theme
+		icontheme=$(echo "$configdata" | grep "IconTheme=")
+        icontheme=$(echo $icontheme | sed "s/IconTheme=//g")
+		echo 80
+		echo "#"$(eval_gettext "Applying Icon Theme...")""
+		newfield=$(echo 'gtk-icon-theme-name="'$icontheme'"')
+		/usr/bin/plasma-icons-apply "$icontheme"
+        
+        plasmashell --replace >/dev/null 2>&1 &
+        killall feren-oobe-plasma feren-oobe.py
+		rm -f /tmp/feren-oobe-running-$(whoami)
+		echo "LaF ThemeMode" > ~/.feren/oobe-complete-plasma
+        feren-oobe-plasma >/dev/null 2>&1 &
+        
+        echo 90
+        echo "#"$(eval_gettext "Changing desktop shortcut for Themes...")""
+        while read p; do if [[ $p == *"="* ]] && [[ ! $p == "#"* ]]; then
+            export $p
+        fi; done <~/.config/user-dirs.dirs
+        export XDG_DESKTOP_DIR=$(eval echo "$XDG_DESKTOP_DIR")
+        if [ -f "$XDG_DESKTOP_DIR/feren-themer.desktop" ] && [ -f /etc/skel/Desktop/feren-themer-plasma.desktop ] && [ -f /usr/share/feren-cinn2plas/feren-themer.desktop ]; then
+            cmp -s "$XDG_DESKTOP_DIR/feren-themer.desktop" /usr/share/feren-cinn2plas/feren-themer.desktop && cp -f /etc/skel/Desktop/kcm_lookandfeel.desktop "$XDG_DESKTOP_DIR/feren-themer.desktop" && cp -f /etc/skel/Desktop/kcm_desktoplayout.desktop "$XDG_DESKTOP_DIR/kcm_desktoplayout.desktop"
+        fi
+        
+        echo 95
+        echo "#"$(eval_gettext "Porting all Feren OS Theme Colourisations to Plasma...")""
+        cd "$HOME/.themes"
+        for themefolder in *; do if [ -d "$themefolder" ]; then
+            if [ "$(cat "$HOME/.themes/$themefolder/theme-colouriser-type")" = "feren" ]; then
+                if [ -f '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/colour.sh' ] && [ -f "$HOME/.themes/$themefolder/theme-colouriser-colour" ] && [ -f "$HOME/.themes/$themefolder/colouriser-theme-settings" ]; then
+                    if [ "$(cat  "$HOME/.themes/$themefolder/colouriser-theme-settings")" = "colrtbars" ]; then
+                        tbarmode="colour-titlebars"
+                    else
+                        tbarmode="none"
+                    fi
+                    newthemename=$(echo "$themefolder" | tr -cd '[:alnum:]._-' | sed 's/-//g')
+                    newthemename="${newthemename^}"
+                    if [ -d "$HOME/.themes/$newthemename" ] && [ -f "$HOME/.config/Kvantum/$newthemename/$newthemename.kvconfig" ] && [ -f "$HOME/.local/share/color-schemes/$newthemename.colors" ]; then
+                        :
+                    else
+                        '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/colour.sh' --colour=$(cat "$HOME/.themes/$themefolder/theme-colouriser-colour") --name="$newthemename" --location="$HOME/.themes" --titlebarmode="$tbarmode" --thememode="Light" --quit-on-invalid
+                    fi
+                fi
+            fi
+        fi; done
+        cd
+        
+		echo 99
+		echo "#"$(eval_gettext "Getting ready to set the wallpaper...")""
+	else
+        echo 10
+        echo "#"$(eval_gettext "Changing desktop shortcut for Themes...")""
+        while read p; do if [[ $p == *"="* ]] && [[ ! $p == "#"* ]]; then
+            export $p
+        fi; done <~/.config/user-dirs.dirs
+        export XDG_DESKTOP_DIR=$(eval echo "$XDG_DESKTOP_DIR")
+        if [ -f "$XDG_DESKTOP_DIR/feren-themer.desktop" ] && [ -f /etc/skel/Desktop/feren-themer-plasma.desktop ] && [ -f /usr/share/feren-cinn2plas/feren-themer.desktop ]; then
+            cmp -s "$XDG_DESKTOP_DIR/feren-themer.desktop" /usr/share/feren-cinn2plas/feren-themer.desktop && cp -f /etc/skel/Desktop/kcm_lookandfeel.desktop "$XDG_DESKTOP_DIR/feren-themer.desktop" && cp -f /etc/skel/Desktop/kcm_desktoplayout.desktop "$XDG_DESKTOP_DIR/kcm_desktoplayout.desktop"
+        fi
+        
+        echo 20
+        echo "#"$(eval_gettext "Porting all Feren OS Theme Colourisations to Plasma...")""
+        cd "$HOME/.themes"
+        for themefolder in *; do if [ -d "$themefolder" ]; then
+            if [ "$(cat "$HOME/.themes/$themefolder/theme-colouriser-type")" = "feren" ]; then
+                if [ -f '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/colour.sh' ] && [ -f "$HOME/.themes/$themefolder/theme-colouriser-colour" ] && [ -f "$HOME/.themes/$themefolder/colouriser-theme-settings" ]; then
+                    if [ "$(cat  "$HOME/.themes/$themefolder/colouriser-theme-settings")" = "colrtbars" ]; then
+                        tbarmode="colour-titlebars"
+                    else
+                        tbarmode="none"
+                    fi
+                    newthemename=$(echo "$themefolder" | tr -cd '[:alnum:]._-')
+                    newthemename="${newthemename^}"
+                    if [ -d "$HOME/.themes/$newthemename" ] && [ -f "$HOME/.config/Kvantum/$newthemename/$newthemename.kvconfig" ] && [ -f "$HOME/.local/share/color-schemes/$newthemename.colors" ]; then
+                        :
+                    else
+                        '/usr/share/feren-theme-colouriser/plasma/Feren OS Theme/colour.sh' --colour=$(cat "$HOME/.themes/$themefolder/theme-colouriser-colour") --name="$newthemename" --location="$HOME/.themes" --titlebarmode="$tbarmode" --thememode="Light" --quit-on-invalid
+                    fi
+                fi
+            fi
+        fi; done
+        cd
+        
+		echo 99
+		echo "#"$(eval_gettext "Couldn't find configuration data, skipping and leaving Plasma with default settings...")""
+		
+		plasmashell --replace >/dev/null 2>&1 &
+	fi
+	echo 100
+	echo "#"$(eval_gettext "Finishing...")""
+    	
+    kwin >/dev/null 2>&1 &
+    
+	if [ ! -z "$warnings" ]; then
+		echo "The following warnings have been issued during the transferring of settings from the old experience to the new experience:
+$warnings
+
+Outside of that, welcome to the new Feren OS, I hope you'll enjoy it!
+- The Feren OS Developer
+
+This file was generated by the Feren OS Cinnamon -> Plasma Transfer Procedure. It will be deleted next time the system boots up. It's safe to close this Kate window." | dd of="/tmp/Settings transfer warnings for user $(whoami)"
+	fi
+	exit 0
+fi
+
+killall feren-oobe-plasma feren-oobe.py feren-welcome
+$0 --rest-process | zenity --progress --auto-close --no-cancel --title=" " --text="$(eval_gettext "Sit back and relax, we're just setting up your new Feren OS Experience, this won't take too long.")"
+rm -f ~/.config/autostart/feren-plasma-cinnrestore.desktop
+if [ -f "/tmp/Settings transfer warnings for user $(whoami)" ]; then
+	kate "/tmp/Settings transfer warnings for user $(whoami)" &
+fi
+sleep 10
+$0 --bg
+sleep 20
+$0 --bg
+notify-send --app-name="feren-plasma-cinnrestore" --icon="plasma-workspace" "All done" "All your backed up settings have been applied here. Enjoy."
+/usr/bin/feren-oobe-plasma
+
+exit 0
